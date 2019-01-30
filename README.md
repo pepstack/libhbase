@@ -39,6 +39,10 @@ For examples on how to use the APIs, please take a look at [this sample source](
 
 As the library uses JNI, you will need to have both `libhbase` and `libjvm` shared libraries in your application's library search path. The jars required for the library can be specified through either of the environment variables `CLASSPATH` or `HBASE_LIB_DIR`. Custom JVM options, for example `-Xmx`, etc can be specified using the environment variable `LIBHBASE_OPTS`.
 
+You may find libjvm.so on linux in below path:
+
+    /usr/local/java/jre/lib/amd64/server/libjvm.so
+
 ## Performance Testing
 A performance test is included with the library which currently support sequential/random gets and puts. You can run the tests using this [shell script](bin/perftest.sh).
 
