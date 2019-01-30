@@ -454,7 +454,9 @@ int main (int argc, char **argv)
   for (int i = 0; i < num_puts; ++i) {
     row_data_t *row_data = (row_data_t *) calloc(1, sizeof(row_data_t));
     row_data->key   = bytebuffer_printf("%s%02d", rowkey_prefix, i);
+
     hb_put_create(row_data->key->buffer, row_data->key->length, &put);
+
     hb_mutation_set_table(put, table_name, table_name_len);
     hb_mutation_set_durability(put, DURABILITY_SKIP_WAL);
     hb_mutation_set_bufferable(put, false);
@@ -477,8 +479,8 @@ int main (int argc, char **argv)
     cell->ts = HBASE_LATEST_TIMESTAMP;
 
     hb_put_add_cell(put, cell);
-    HBASE_LOG_INFO("Sending row with row key : '%.*s'.",
-                   cell->row_len, cell->row);
+    HBASE_LOG_INFO("Sending row with row key : '%.*s'.", cell->row_len, cell->row);
+
     hb_mutation_send(client, put, put_callback, row_data);
   }
   hb_client_flush(client, client_flush_callback, NULL);
@@ -491,7 +493,9 @@ int main (int argc, char **argv)
   {
     row_data_t *row_data = (row_data_t *) calloc(1, sizeof(row_data_t));
     row_data->key = bytebuffer_printf("row_with_two_cells");
+
     hb_put_create(row_data->key->buffer, row_data->key->length, &put);
+
     hb_mutation_set_table(put, table_name, table_name_len);
     hb_mutation_set_durability(put, DURABILITY_SYNC_WAL);
 
@@ -512,6 +516,7 @@ int main (int argc, char **argv)
     cell1->value = cell1_data->value->buffer;
     cell1->value_len = cell1_data->value->length;
     cell1->ts = 1391111111111L;
+
     hb_put_add_cell(put, cell1);
 
     // second cell
@@ -531,11 +536,13 @@ int main (int argc, char **argv)
     cell2->value = cell2_data->value->buffer;
     cell2->value_len = cell2_data->value->length;
     cell2->ts = 1391111111111L;
+
     hb_put_add_cell(put, cell2);
 
-    HBASE_LOG_INFO("Sending row with row key : '%.*s'.",
-                   cell1->row_len, cell1->row);
+    HBASE_LOG_INFO("Sending row with row key : '%.*s'.", cell1->row_len, cell1->row);
+
     hb_mutation_send(client, put, put_callback, row_data);
+
     wait_for_puts();
   }
 

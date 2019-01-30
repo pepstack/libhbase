@@ -53,10 +53,32 @@ refer:
 
 [mapr](https://mapr.com/docs/51/HBase/Using-the-libhbase-Librar_28216980.html)
 
-    mvn clean
-    sh install.sh
+   - create hbase table:
 
-    cd src/examples
-    sh build-hello_hbase.sh
+        # hbase shell
+        # hbase(main)> create 'libhbase_test', {NAME => 'f1', VERSIONS => 2},{NAME => 'f2', VERSIONS => 2}
+        # hbase(main)> describe 'libhbase_test'
+        # hbase(main)> put 'libhbase_test', 'rowkey001', 'f1:col1', 'value01'
+        # hbase(main)> get 'libhbase_test', 'rowkey001'
+        # hbase(main)> scan 'libhbase_test'
+
+    - build and run:
+
+        mvn clean
+        sh install.sh
+
+        cd src/examples
+        sh build-hello_hbase.sh
+
+    - check table rows:
+    
+        hbase(main)> scan 'libhbase_test'
 
 
+notes:
+
+    @jnihelper.cc(ParseJavaException#438): Java exception: java.lang.IllegalArgumentException
+
+    Not a host:port pair: PBUF
+
+    项目包含的 jar 包和 hbase 服务器的版本不一致，将引用的 jar 包改成对应的版本即可 !
