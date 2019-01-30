@@ -31,19 +31,19 @@
   </developers>
 
   <repositories>
-    <!-- http://repository.mapr.com/ -->
     <repository>
-      <id>mapr-releases</id>
+      <id>mapr public</id>
+      <name>MapR Public Maven Repository</name>
       <url>http://repository.mapr.com/maven/</url>
       <snapshots>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
       </snapshots>
       <releases>
         <enabled>true</enabled>
       </releases>
     </repository>
 
-    <!-- https://mvnrepository.com/ -->
+    <!-- https://mvnrepository.com/
     <repository>
       <id>mvnrepository central</id>
       <name>mvnrepository.com</name>
@@ -55,6 +55,7 @@
         <enabled>true</enabled>
       </releases>
     </repository>
+    -->
   </repositories>
 
   <properties>
@@ -284,7 +285,7 @@
     <dependency>
       <groupId>org.hbase</groupId>
       <artifactId>asynchbase</artifactId>
-      <version>1.7.0-mapr-1603</version>
+      <version>1.5.0-libhbase-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <artifactId>log4j-over-slf4j</artifactId>
@@ -512,20 +513,19 @@
     </profile>
 
     <profile>
-      <id>hadoop-client</id>
+      <id>hadoop-1.0</id>
       <activation>
         <property>
           <name>!hadoop.profile</name>
         </property>
       </activation>
       <properties>
-        <!-- can work from 1.0.3 to 3.2.0 -->
-        <hadoop.jar.version>1.0.3</hadoop.jar.version>
+        <hadoop.jar.version>1.0.4</hadoop.jar.version>
       </properties>
       <dependencies>
         <dependency>
           <groupId>org.apache.hadoop</groupId>
-          <artifactId>hadoop-client</artifactId>
+          <artifactId>hadoop-core</artifactId>
           <version>${hadoop.jar.version}</version>
           <exclusions>
             <exclusion>

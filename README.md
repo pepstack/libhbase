@@ -49,5 +49,14 @@ A performance test is included with the library which currently support sequenti
 
 ## Using the libhbase Library
 
+refer:
+
 [mapr](https://mapr.com/docs/51/HBase/Using-the-libhbase-Librar_28216980.html)
+
+    mvn clean
+    sh install.sh
+
+    cd src/examples
+    sh build-hello_hbase.sh
+
 

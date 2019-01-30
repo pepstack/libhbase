@@ -48,28 +48,35 @@ extern  "C" {
 static byte_t *FAMILIES[] = { (byte_t *)"f", (byte_t *)"g" };
 static hb_columndesc HCD[2] = { NULL };
 
-typedef struct cell_data_t_ {
+
+typedef struct cell_data_t_
+{
   bytebuffer value;
   hb_cell_t  *hb_cell;
   struct cell_data_t_ *next_cell;
 } cell_data_t;
 
-cell_data_t*
-new_cell_data() {
+
+cell_data_t* new_cell_data()
+{
   cell_data_t *cell_data = (cell_data_t*) calloc(1, sizeof(cell_data_t));
   cell_data->next_cell = NULL;
   return cell_data;
 }
 
-typedef struct row_data_t_ {
+
+typedef struct row_data_t_
+{
   bytebuffer key;
   struct cell_data_t_ *first_cell;
 } row_data_t;
 
-static void
-release_row_data(row_data_t *row_data) {
+
+static void release_row_data(row_data_t *row_data)
+{
   if (row_data != NULL) {
     cell_data_t *cell = row_data->first_cell;
+
     while (cell) {
       bytebuffer_free(cell->value);
       free(cell->hb_cell);
@@ -82,6 +89,7 @@ release_row_data(row_data_t *row_data) {
   }
 }
 
+
 /**
  * Put synchronizer and callback
  */
@@ -89,9 +97,8 @@ static volatile int32_t outstanding_puts_count;
 static pthread_cond_t puts_cv = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t puts_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static void
-put_callback(int32_t err, hb_client_t client,
-    hb_mutation_t mutation, hb_result_t result, void *extra) {
+static void put_callback(int32_t err, hb_client_t client, hb_mutation_t mutation, hb_result_t result, void *extra)
+{
   row_data_t* row_data = (row_data_t *)extra;
   HBASE_LOG_INFO("Received put callback for row \'%.*s\', result = %d.",
       row_data->key->length, row_data->key->buffer, err);
@@ -106,8 +113,9 @@ put_callback(int32_t err, hb_client_t client,
   pthread_mutex_unlock(&puts_mutex);
 }
 
-static void
-wait_for_puts() {
+
+static void wait_for_puts()
+{
   HBASE_LOG_INFO("Waiting for outstanding puts to complete.");
   pthread_mutex_lock(&puts_mutex);
   while (outstanding_puts_count > 0) {
@@ -124,9 +132,8 @@ static volatile bool flush_done = false;
 static pthread_cond_t flush_cv = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t flush_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static void
-client_flush_callback(int32_t err,
-    hb_client_t client, void *extra) {
+static void client_flush_callback(int32_t err, hb_client_t client, void *extra)
+{
   HBASE_LOG_INFO("Received client flush callback.");
   pthread_mutex_lock(&flush_mutex);
   flush_done = true;
@@ -134,8 +141,8 @@ client_flush_callback(int32_t err,
   pthread_mutex_unlock(&flush_mutex);
 }
 
-static void
-wait_for_flush() {
+static void wait_for_flush()
+{
   HBASE_LOG_INFO("Waiting for flush to complete.");
   pthread_mutex_lock(&flush_mutex);
   while (!flush_done) {
@@ -145,7 +152,9 @@ wait_for_flush() {
   HBASE_LOG_INFO("Flush completed.");
 }
 
-static void printRow(const hb_result_t result) {
+
+static void printRow(const hb_result_t result)
+{
   const byte_t *key = NULL;
   size_t key_len = 0;
   hb_result_get_key(result, &key, &key_len);
@@ -171,9 +180,8 @@ static volatile bool get_done = false;
 static pthread_cond_t get_cv = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t get_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static void
-get_callback(int32_t err, hb_client_t client,
-    hb_get_t get, hb_result_t result, void *extra) {
+static void get_callback(int32_t err, hb_client_t client, hb_get_t get, hb_result_t result, void *extra)
+{
   bytebuffer rowKey = (bytebuffer)extra;
   if (err == 0) {
     const char *table_name;
@@ -210,8 +218,8 @@ get_callback(int32_t err, hb_client_t client,
   pthread_mutex_unlock(&get_mutex);
 }
 
-static void
-wait_for_get() {
+static void wait_for_get()
+{
   HBASE_LOG_INFO("Waiting for get operation to complete.");
   pthread_mutex_lock(&get_mutex);
   while (!get_done) {
@@ -228,9 +236,9 @@ static volatile bool delete_done = false;
 static pthread_cond_t del_cv = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t del_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static void
-delete_callback(int32_t err, hb_client_t client,
-    hb_mutation_t delete, hb_result_t result, void *extra) {
+
+static void delete_callback(int32_t err, hb_client_t client, hb_mutation_t delete, hb_result_t result, void *extra)
+{
   bytebuffer rowKey = (bytebuffer)extra;
   HBASE_LOG_INFO("Received delete callback for row \'%.*s\', "
       "result = %d.", rowKey->length, rowKey->buffer, err);
@@ -242,8 +250,9 @@ delete_callback(int32_t err, hb_client_t client,
   pthread_mutex_unlock(&del_mutex);
 }
 
-static void
-wait_for_delete() {
+
+static void wait_for_delete()
+{
   HBASE_LOG_INFO("Waiting for delete operation to complete.");
   pthread_mutex_lock(&del_mutex);
   while (!delete_done) {
@@ -253,6 +262,7 @@ wait_for_delete() {
   HBASE_LOG_INFO("Delete operation completed.");
 }
 
+
 /**
  * Scan synchronizer and callbacks
  */
@@ -260,8 +270,9 @@ static volatile bool scan_done = false;
 static pthread_cond_t scan_cv = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t scan_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-void scan_callback(int32_t err, hb_scanner_t scanner,
-      hb_result_t results[], size_t num_results, void *extra) {
+
+void scan_callback(int32_t err, hb_scanner_t scanner, hb_result_t results[], size_t num_results, void *extra)
+{
   if (num_results) {
     const char *table_name;
     size_t table_name_len;
@@ -283,8 +294,9 @@ void scan_callback(int32_t err, hb_scanner_t scanner,
   }
 }
 
-static void
-wait_for_scan() {
+
+static void wait_for_scan()
+{
   HBASE_LOG_INFO("Waiting for scan to complete.");
   pthread_mutex_lock(&scan_mutex);
   while (!scan_done) {
@@ -294,6 +306,7 @@ wait_for_scan() {
   HBASE_LOG_INFO("Scan completed.");
 }
 
+
 /**
  * Client destroy synchronizer and callbacks
  */
@@ -301,9 +314,8 @@ static volatile bool client_destroyed = false;
 static pthread_cond_t client_destroyed_cv = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t client_destroyed_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static void
-client_disconnection_callback(int32_t err,
-    hb_client_t client, void *extra) {
+static void client_disconnection_callback(int32_t err, hb_client_t client, void *extra)
+{
   HBASE_LOG_INFO("Received client disconnection callback.");
   pthread_mutex_lock(&client_destroyed_mutex);
   client_destroyed = true;
@@ -311,8 +323,9 @@ client_disconnection_callback(int32_t err,
   pthread_mutex_unlock(&client_destroyed_mutex);
 }
 
-static void
-wait_client_disconnection() {
+
+static void wait_client_disconnection()
+{
   HBASE_LOG_INFO("Waiting for client to disconnect.");
   pthread_mutex_lock(&client_destroyed_mutex);
   while (!client_destroyed) {
@@ -322,8 +335,9 @@ wait_client_disconnection() {
   HBASE_LOG_INFO("Client disconnected.");
 }
 
-static int
-ensureTable(hb_connection_t connection, const char *table_name) {
+
+static int ensureTable(hb_connection_t connection, const char *table_name)
+{
   int32_t retCode = 0;
   hb_admin_t admin = NULL;
 
@@ -380,11 +394,12 @@ cleanup:
   return retCode;
 }
 
+
 /**
  * Program entry point
  */
-int
-main(int argc, char **argv) {
+int main (int argc, char **argv)
+{
   int32_t retCode = 0;
   FILE* logFile = NULL;
   hb_connection_t connection = NULL;
@@ -428,8 +443,7 @@ main(int argc, char **argv) {
     goto cleanup;
   }
 
-  HBASE_LOG_INFO("Connecting to HBase cluster using Zookeeper ensemble '%s'.",
-                 zk_ensemble);
+  HBASE_LOG_INFO("Connecting to HBase cluster using Zookeeper ensemble '%s'.", zk_ensemble);
   if ((retCode = hb_client_create(connection, &client)) != 0) {
     HBASE_LOG_ERROR("Could not connect to HBase cluster : errorCode = %d.", retCode);
     goto cleanup;

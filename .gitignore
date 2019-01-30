@@ -12,3 +12,6 @@ gradle-wrapper.jar
 target
 *~
 *.patch
+*.log
+*.o
+hello_hbase
