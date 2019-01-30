@@ -1,6 +1,10 @@
-# libHBase 
+# libHBase-1.0.0
 
 "C" APIs for HBase.
+
+    hbase-0.94
+    hadoop-1.0.3
+    java8
 
 移除了对 [gtest](http://googletest.googlecode.com/files/gtest-1.7.0.zip) 的下载 !
 
@@ -49,33 +53,33 @@ A performance test is included with the library which currently support sequenti
 
 ## Using the libhbase Library
 
-refer:
+### refer:
 
 [mapr](https://mapr.com/docs/51/HBase/Using-the-libhbase-Librar_28216980.html)
 
    - create hbase table:
 
-        # hbase shell
-        # hbase(main)> create 'libhbase_test', {NAME => 'f1', VERSIONS => 2},{NAME => 'f2', VERSIONS => 2}
-        # hbase(main)> describe 'libhbase_test'
-        # hbase(main)> put 'libhbase_test', 'rowkey001', 'f1:col1', 'value01'
-        # hbase(main)> get 'libhbase_test', 'rowkey001'
-        # hbase(main)> scan 'libhbase_test'
+        	# hbase shell
+        	# hbase(main)> create 'libhbase_test', {NAME => 'f1', VERSIONS => 2},{NAME => 'f2', VERSIONS => 2}
+        	# hbase(main)> describe 'libhbase_test'
+        	# hbase(main)> put 'libhbase_test', 'rowkey001', 'f1:col1', 'value01'
+        	# hbase(main)> get 'libhbase_test', 'rowkey001'
+        	# hbase(main)> scan 'libhbase_test'
 
     - build and run:
 
-        mvn clean
-        sh install.sh
+          mvn clean
+          sh install.sh
 
-        cd src/examples
-        sh build-hello_hbase.sh
+          cd src/examples
+          sh build-hello_hbase.sh
 
     - check table rows:
     
-        hbase(main)> scan 'libhbase_test'
+        	hbase(main)> scan 'libhbase_test'
 
 
-notes:
+### notes:
 
     @jnihelper.cc(ParseJavaException#438): Java exception: java.lang.IllegalArgumentException
 
