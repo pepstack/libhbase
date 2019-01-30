@@ -2,6 +2,8 @@
 
 "C" APIs for HBase.
 
+移除了对 [gtest](http://googletest.googlecode.com/files/gtest-1.7.0.zip) 的下载 !
+
 ## Building libHBase
 
 ```
