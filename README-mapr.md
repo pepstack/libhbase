@@ -3,12 +3,11 @@
 "C" APIs for HBase.
 
 ## Building libHBase
-
 ```
-  sh install.sh
+  mvn install -DskipTests
 ```
 
-This will build the tarball (libhbase-1.0-SNAPSHOT.tar.gz) containing the headers, shared library and the jars in the `target` directory with the following structure.
+This will build the tarball containing the headers, shared library and the jars in the `target` directory with the following structure.
 
 ```
 +---bin
@@ -39,9 +38,3 @@ As the library uses JNI, you will need to have both `libhbase` and `libjvm` shar
 
 ## Performance Testing
 A performance test is included with the library which currently support sequential/random gets and puts. You can run the tests using this [shell script](bin/perftest.sh).
-
-
-## Using the libhbase Library
-
-[mapr](https://mapr.com/docs/51/HBase/Using-the-libhbase-Librar_28216980.html)
-
