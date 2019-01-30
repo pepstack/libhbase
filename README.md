@@ -41,7 +41,7 @@ As the library uses JNI, you will need to have both `libhbase` and `libjvm` shar
 
 You may find libjvm.so on linux in below path:
 
-    /usr/local/java/jre/lib/amd64/server/libjvm.so
+    $JAVA_HOME/jre/lib/amd64/server/libjvm.so
 
 ## Performance Testing
 A performance test is included with the library which currently support sequential/random gets and puts. You can run the tests using this [shell script](bin/perftest.sh).
