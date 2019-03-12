@@ -28,8 +28,10 @@ LANG=zh_CN.UTF-8;export LANG
 # hbase(main)> get 'libhbase_test', 'rowkey001'
 # hbase(main)> scan 'libhbase_test'
 ##############################################################################
+jdk_home_dir=$(echo $JAVA_HOME)
+
 libhbase_ver="libhbase-1.0-SNAPSHOT"
-libjvm_dir="/usr/local/java/jre/lib/amd64/server"
+libjvm_dir="$jdk_home_dir/jre/lib/amd64/server"
 
 echo "* clean old target: $_cdir/hello_hbase"
 rm -rf $_cdir/hello_hbase
@@ -53,7 +55,8 @@ HBASE_LIB_DIR=$_cdir/../../target/$libhbase_ver/lib
 # Environment variable HBASE_CONF_DIR not set!
 HBASE_CONF_DIR="/etc/hbase/conf"
 
-ZK_QUORUM="ha06.ztgame.com:2181,ha07.ztgame.com:2181,ha08.ztgame.com:2181"
+#ZK_QUORUM="ha06.ztgame.com:2181,ha07.ztgame.com:2181,ha08.ztgame.com:2181"
+ZK_QUORUM="localhost:2182"
 
 export LD_LIBRARY_PATH && \
 export HBASE_LIB_DIR && \

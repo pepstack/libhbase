@@ -36,7 +36,7 @@ extern  "C" {
 #define HTABLE_NAME  "libhbase_test"
 
 /* "ha08.ztgame.com:2181,ha07.ztgame.com:2181,ha06.ztgame.com:2181" */
-#define ZK_QUORUM    "localhost:2181"
+#define ZK_QUORUM    "localhost:2182"
 
 
 static int ensure_hbase_table (hb_connection_t connection, const char *table_name)
@@ -84,7 +84,7 @@ static void hbase_put_cell (hb_client_t client)
     hb_put_t put = NULL;
     hb_cell_t *cell = NULL;
 
-    rowkeylen = snprintf(rowkey, sizeof(rowkey), "%s", "rowkey_2");
+    rowkeylen = snprintf(rowkey, sizeof(rowkey), "%s", "rowkey_121212");
 
     hb_put_create(rowkey, rowkeylen, &put);
 
@@ -121,6 +121,57 @@ static void hbase_put_cell (hb_client_t client)
 }
 
 
+static void printRow(const hb_result_t result)
+{
+    size_t i;
+    const byte_t *key = NULL;
+    size_t key_len = 0;
+    hb_result_get_key(result, &key, &key_len);
+
+    size_t cell_count = 0;
+
+    hb_result_get_cell_count(result, &cell_count);
+
+    printf("Row='%.*s', cell count=%d\n", key_len, key, cell_count);
+
+    const hb_cell_t **cells;
+    hb_result_get_cells(result, &cells, &cell_count);
+
+    for (i = 0; i < cell_count; ++i) {
+        printf("Cell %d: family='%.*s', qualifier='%.*s', value='%.*s', timestamp=%lld.\n",
+            i,
+            cells[i]->family_len, cells[i]->family,
+            cells[i]->qualifier_len, cells[i]->qualifier,
+            cells[i]->value_len, cells[i]->value, cells[i]->ts);
+    }
+}
+
+
+static void get_callback(int32_t err, hb_client_t client, hb_get_t get, hb_result_t result, void *extra)
+{
+    int * pflag = (int *) extra;
+
+    if (err == 0 && result) {
+        const char *table_name;
+        size_t table_name_len;
+
+        hb_result_get_table(result, &table_name, &table_name_len);
+
+        printf("get table: {%.*s}", table_name_len, table_name);
+
+        printRow(result);
+    }
+    
+    if (result) {
+        hb_result_destroy(result);
+    }
+
+    hb_get_destroy(get);
+
+    *pflag = 1;
+}
+
+
 static void hbase_get_cell (hb_client_t client)
 {
     char rowkey[256];
@@ -139,17 +190,19 @@ static void hbase_get_cell (hb_client_t client)
     /* up to ten versions of each column */
     hb_get_set_num_versions(get, 10);
 
-    hb_get_send(client, get, NULL, NULL);
+    volatile int flag = 0;
 
-    sleep(1);
+    hb_get_send(client, get, get_callback, (void *) &flag);
 
-    hb_get_destroy(get);
+    while(! flag) {
+        usleep(1000);
+    }
 }
 
 
 int main (int argc, char *argv[])
 {
-    int rc = 0;
+    int i, rc = 0;
 
     hb_connection_t connection = NULL;
     hb_client_t client = NULL;
@@ -184,11 +237,21 @@ int main (int argc, char *argv[])
         goto cleanup;
     }
 
-    hbase_get_cell(client);
-
     hbase_put_cell(client);
 
-    sleep(1);
+    sleep(3);
+
+    time_t t0 = time(0);
+    printf("start time=%ju\n", t0);
+
+    for (i = 0; i < 1000000; i++) {
+        hbase_get_cell(client);
+    }
+
+    time_t t1 = time(0);
+    printf("end time=%ju. elaps=%ju\n", t1, t1 - t0);
+
+    sleep(3);
 
 cleanup:
     if (client) {
